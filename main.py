@@ -15,5 +15,5 @@ df_ind = df.set_index("DATE")
 # Visualising the Data
 df_ind = df_ind.astype(float)
 df_ind.plot()
-plt.show()
 plt.savefig("data/initial_data.png")
+plt.show()
