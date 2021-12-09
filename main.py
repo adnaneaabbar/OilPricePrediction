@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.preprocessing import sequence
 from keras.models import load_model
+from sklearn.preprocessing import MinMaxScaler
 
 df = pd.read_csv("data/DCOILBRENTEU.csv", sep=",")
 print(df.shape)
@@ -40,6 +41,11 @@ def get_train_size(data, batch_size, test_percent):
 # # print(get_train_size(df, batch_size, test_percent))       # 7872
 
 train_size = get_train_size(df, batch_size, test_percent) + timesteps * 2
-df_train = df[0: train_size]
+df_train = df[0: train_size]                                  # 7892, 2
 training_set = df_train.iloc[:, 1:2].values
-print(training_set.shape)                                     # 7892
+print(training_set.shape)                                     # 7892, 1
+
+# Feature Scaling
+scaler = MinMaxScaler(feature_range=(0, 1))
+train_scaled = scaler.fit_transform(np.float64(training_set))
+print(train_scaled.shape)
