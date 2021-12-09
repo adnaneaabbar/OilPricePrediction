@@ -36,5 +36,10 @@ def get_train_size(data, batch_size, test_percent):
         if i % batch_size == 0:
             return i
 
-print(len(df) * (1 - test_percent))
-print(get_train_size(df, batch_size, test_percent))
+# print(len(df) * (1 - test_percent))                         # 7890.3
+# # print(get_train_size(df, batch_size, test_percent))       # 7872
+
+train_size = get_train_size(df, batch_size, test_percent) + timesteps * 2
+df_train = df[0: train_size]
+training_set = df_train.iloc[:, 1:2].values
+print(training_set.shape)                                     # 7892
