@@ -5,15 +5,13 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.layers import Dense
 from keras.layers import Input, LSTM
 from keras.models import Model
-from keras.preprocessing import sequence
-from keras.models import load_model
 
 df = pd.read_csv("data/DCOILBRENTEU.csv", sep=",")
 # print(df.shape)                                             # 9009, 2
 
 # print(df.head())
 
-#remove NA values
+# remove NA values
 df = df[df["DCOILBRENTEU"] != "."]
 print(df.shape)
 
@@ -30,6 +28,7 @@ epochs = 120
 timesteps = 10
 test_percent = 0.1
 
+
 # setting the training size
 def get_train_size(data, batch_size, test_percent):
     n = len(data)
@@ -40,11 +39,12 @@ def get_train_size(data, batch_size, test_percent):
         if i % batch_size == 0:
             return i
 
+
 # print(len(df) * (1 - test_percent))                         # 7890.3
 # # print(get_train_size(df, batch_size, test_percent))       # 7872
 
 train_size = get_train_size(df, batch_size, test_percent) + 2 * timesteps
-df_train = df[0: train_size]                                  # 7892, 2
+df_train = df[0: train_size]  # 7892, 2
 training_set = df_train.iloc[:, 1:2].values
 # print(training_set.shape)                                   # 7892, 1
 
@@ -57,17 +57,17 @@ train_scaled = scaler.fit_transform(training_set)
 x_train = []
 y_train = []
 for i in range(timesteps, train_size - timesteps):
-    x_train.append(train_scaled[i-timesteps:i, 0])
-    y_train.append(train_scaled[i:i+timesteps, 0])
+    x_train.append(train_scaled[i - timesteps:i, 0])
+    y_train.append(train_scaled[i:i + timesteps, 0])
 
-x_train = np.array(x_train, dtype=object)
-y_train = np.array(y_train, dtype=object)
-print(x_train.shape)                                   # 7872, 10
-print(y_train.shape)                                   # 7872, 10
+x_train = np.asarray(x_train).astype(np.float32)
+y_train = np.asarray(y_train).astype(np.float32)
+print(x_train.shape)  # 7872, 10
+print(y_train.shape)  # 7872, 10
 x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 y_train = np.reshape(y_train, (y_train.shape[0], y_train.shape[1], 1))
-print(x_train.shape)                                   # 7872, 10, 1
-print(y_train.shape)                                   # 7872, 10, 1
+print(x_train.shape)  # 7872, 10, 1
+print(y_train.shape)  # 7872, 10, 1
 
 inputs = Input(batch_shape=(batch_size, timesteps, 1))
 lstm_1 = LSTM(10, stateful=True, return_sequences=True)(inputs)
@@ -76,3 +76,11 @@ output_1 = Dense(units=1)(lstm_2)
 model = Model(inputs=inputs, outputs=output_1)
 model.compile(optimizer='adam', loss='mae')
 model.summary()
+
+# train
+for i in range(epochs):
+    print("Epoch: " + str(i))
+    model.fit(x_train, y_train, shuffle=False, epochs=1, batch_size=batch_size)
+    model.reset_states()
+
+# model.save(filepath="models/model_with_10ts.h5")
