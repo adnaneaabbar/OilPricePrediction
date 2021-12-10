@@ -1,14 +1,17 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+from keras.layers import Dense
+from keras.layers import Input, LSTM
+from keras.models import Model
 from keras.preprocessing import sequence
 from keras.models import load_model
-from sklearn.preprocessing import MinMaxScaler
 
 df = pd.read_csv("data/DCOILBRENTEU.csv", sep=",")
-print(df.shape)
+# print(df.shape)                                             # 9009, 2
 
-print(df.head())
+# print(df.head())
 
 #remove NA values
 df = df[df["DCOILBRENTEU"] != "."]
@@ -40,12 +43,36 @@ def get_train_size(data, batch_size, test_percent):
 # print(len(df) * (1 - test_percent))                         # 7890.3
 # # print(get_train_size(df, batch_size, test_percent))       # 7872
 
-train_size = get_train_size(df, batch_size, test_percent) + timesteps * 2
-df_train = df[0: train_size]                                  # 7892, 2
+train_size = get_train_size(df, batch_size, test_percent)
+df_train = df[0: train_size]                                  # 7872, 2
 training_set = df_train.iloc[:, 1:2].values
-print(training_set.shape)                                     # 7892, 1
+# print(training_set.shape)                                   # 7872, 1
 
 # Feature Scaling
 scaler = MinMaxScaler(feature_range=(0, 1))
-train_scaled = scaler.fit_transform(np.float64(training_set))
-print(train_scaled.shape)
+train_scaled = scaler.fit_transform(training_set)
+# print(train_scaled.shape)                                   # 7892, 1
+
+# Constructing X, Y train
+x_train = []
+y_train = []
+for i in range(timesteps, train_size - timesteps + 1):
+    x_train.append(train_scaled[i-timesteps:i, 0])
+    y_train.append(train_scaled[i:i+timesteps, 0])
+
+x_train = np.array(x_train, dtype=object)
+y_train = np.array(y_train, dtype=object)
+print(x_train.shape)
+print(y_train.shape)
+x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+y_train = np.reshape(y_train, (y_train.shape[0], y_train.shape[1], 1))
+print(x_train.shape)
+print(y_train.shape)
+
+inputs = Input(batch_shape=(batch_size, timesteps, 1))
+lstm_1 = LSTM(10, stateful=True, return_sequences=True)(inputs)
+lstm_2 = LSTM(10, stateful=True, return_sequences=True)(lstm_1)
+output_1 = Dense(units=1)(lstm_2)
+model = Model(inputs=inputs, outputs=output_1)
+model.compile(optimizer='adam', loss='mae')
+model.summary()
