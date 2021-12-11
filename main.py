@@ -25,7 +25,7 @@ df = df[df["DCOILBRENTEU"] != "."]
 
 batch_size = 64
 epochs = 120
-timesteps = 10
+timesteps = 20
 test_percent = 0.1
 
 
@@ -98,13 +98,13 @@ x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 # print(x_test.shape)  # 832, 10
 
 # model training
-'''
+# '''
 inputs = Input(batch_shape=(batch_size, timesteps, 1))
 lstm_1 = LSTM(10, stateful=True, return_sequences=True)(inputs)
 lstm_2 = LSTM(10, stateful=True, return_sequences=True)(lstm_1)
 output_1 = Dense(units=1)(lstm_2)
 model = Model(inputs=inputs, outputs=output_1)
-model.compile(optimizer='adam', loss='mae')
+model.compile(optimizer='adam', loss='mse')
 model.summary()
 
 for i in range(epochs):
@@ -113,7 +113,7 @@ for i in range(epochs):
     model.reset_states()
 
 model.save(filepath="models/model_with_10ts.h5")
-'''
+# '''
 
 model = load_model("models/model_with_10ts.h5")
 
@@ -140,15 +140,16 @@ y_test = np.reshape(y_test, (y_test.shape[0], 1))
 # print(y_test.shape)   # 832, 1
 test_set = np.asarray(test_set).astype(np.float32)
 
-# # Visualising the results
-# plt.plot(test_set[timesteps:len(y_test)], color='red', label='Real Crude Oil Prices')
-# plt.plot(y_test[0:len(y_test) - timesteps], color='blue', label='Predicted Crude Oil Prices')
-# plt.title('Crude Oil Prices Prediction - MAE')
-# plt.xlabel('Time')
-# plt.ylabel('Crude Oil Prices')
-# plt.legend()
-# plt.savefig("data/pred.png")
-# plt.show()
+# Visualising the results
+plt.plot(test_set[timesteps:len(y_test)], color='red', label='Real Crude Oil Prices')
+plt.plot(y_test[0:len(y_test) - timesteps], color='blue', label='Predicted Crude Oil Prices')
+plt.title('Crude Oil Prices Prediction - MAE')
+plt.xlabel('Time')
+plt.ylabel('Crude Oil Prices')
+plt.legend()
+plt.savefig("data/pred_30_ts.png")
+plt.show()
+
 test_set = np.reshape(test_set, (test_set.shape[0]))
 y_test = np.reshape(y_test, (y_test.shape[0]))
 rmse = math.sqrt(mean_squared_error(test_set[timesteps:len(y_test)], y_test[0:len(y_test) - timesteps]))
