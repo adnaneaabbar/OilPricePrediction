@@ -38,6 +38,7 @@ def get_train_size(data, batch_size, test_percent):
         if i % batch_size == 0:
             return i
 
+
 # setting the test size
 def get_test_size(data, batch_size):
     n = len(data)
@@ -78,7 +79,7 @@ for i in range(timesteps, train_size - timesteps):
 
 x_test = []
 for i in range(timesteps, (test_size - train_size) - timesteps):
-    x_test.append(test_scaled[i-timesteps:i, 0])
+    x_test.append(test_scaled[i - timesteps:i, 0])
 
 x_train = np.asarray(x_train).astype(np.float32)
 y_train = np.asarray(y_train).astype(np.float32)
@@ -129,11 +130,20 @@ predicted_test = scaler.inverse_transform(predicted_test)
 
 # y_test
 y_test = []
-#(test_size - train_size) - timesteps
 for i in range(0, (test_size - train_size) - timesteps * 2):
-    y_test = np.append(y_test, predicted_test[i, timesteps-1])
+    y_test = np.append(y_test, predicted_test[i, timesteps - 1])
 # print(y_test.shape)   # 832
 
 # reshaping
 y_test = np.reshape(y_test, (y_test.shape[0], 1))
 # print(y_test.shape)   # 832, 1
+test_set = np.asarray(test_set).astype(np.float32)
+# Visualising the results
+plt.plot(test_set[timesteps:len(y_test)], color='red', label='Real Crude Oil Prices')
+plt.plot(y_test[0:len(y_test) - timesteps], color='blue', label='Predicted Crude Oil Prices')
+plt.title('Crude Oil Prices Prediction - MAE')
+plt.xlabel('Time')
+plt.ylabel('Crude Oil Prices')
+plt.legend()
+plt.savefig("data/pred.png")
+plt.show()
