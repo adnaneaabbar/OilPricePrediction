@@ -112,10 +112,11 @@ for i in range(epochs):
     model.fit(x_train, y_train, shuffle=False, epochs=1, batch_size=batch_size)
     model.reset_states()
 
-model.save(filepath="models/model_with_10ts.h5")
+filename = f"models/model_with_{timesteps}ts.h5"
+model.save(filepath=filename)
 # '''
 
-model = load_model("models/model_with_10ts.h5")
+model = load_model(filename)
 
 # prediction
 predicted_test = model.predict(x_test, batch_size=batch_size)
