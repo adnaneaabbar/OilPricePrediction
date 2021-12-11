@@ -25,7 +25,7 @@ df = df[df["DCOILBRENTEU"] != "."]
 
 batch_size = 64
 epochs = 120
-timesteps = 20
+timesteps = 30
 test_percent = 0.1
 
 
