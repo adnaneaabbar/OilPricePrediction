@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from keras.layers import Dense, Input, LSTM
 from keras.models import Model, load_model
-
+from keras.metrics import mean_squared_error, mean_absolute_error
 df = pd.read_csv("data/DCOILBRENTEU.csv", sep=",")
 # print(df.shape)                                             # 9009, 2
 
@@ -138,12 +139,20 @@ for i in range(0, (test_size - train_size) - timesteps * 2):
 y_test = np.reshape(y_test, (y_test.shape[0], 1))
 # print(y_test.shape)   # 832, 1
 test_set = np.asarray(test_set).astype(np.float32)
-# Visualising the results
-plt.plot(test_set[timesteps:len(y_test)], color='red', label='Real Crude Oil Prices')
-plt.plot(y_test[0:len(y_test) - timesteps], color='blue', label='Predicted Crude Oil Prices')
-plt.title('Crude Oil Prices Prediction - MAE')
-plt.xlabel('Time')
-plt.ylabel('Crude Oil Prices')
-plt.legend()
-plt.savefig("data/pred.png")
-plt.show()
+
+# # Visualising the results
+# plt.plot(test_set[timesteps:len(y_test)], color='red', label='Real Crude Oil Prices')
+# plt.plot(y_test[0:len(y_test) - timesteps], color='blue', label='Predicted Crude Oil Prices')
+# plt.title('Crude Oil Prices Prediction - MAE')
+# plt.xlabel('Time')
+# plt.ylabel('Crude Oil Prices')
+# plt.legend()
+# plt.savefig("data/pred.png")
+# plt.show()
+test_set = np.reshape(test_set, (test_set.shape[0]))
+y_test = np.reshape(y_test, (y_test.shape[0]))
+rmse = math.sqrt(mean_squared_error(test_set[timesteps:len(y_test)], y_test[0:len(y_test) - timesteps]))
+print("RMSE : ", rmse)
+
+mae = mean_absolute_error(test_set[timesteps:len(y_test)], y_test[0:len(y_test) - timesteps])
+print("MAE : ", mae.numpy())
