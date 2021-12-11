@@ -31,21 +31,25 @@ test_percent = 0.1
 
 # setting the training size
 def get_train_size(data, batch_size, test_percent):
+    val = []
     n = len(data)
     n *= (1 - test_percent)
     if int(n) % batch_size == 0:
-        return int(n)
-    for i in range(int(n) - batch_size, int(n)):
+        val.append(int(n))
+    for i in range(int(n) - batch_size * 2, int(n)):
         if i % batch_size == 0:
-            return i
+            val.append(i)
+    return max(val)
 
 
 # setting the test size
 def get_test_size(data, batch_size):
+    val = []
     n = len(data)
-    for i in range(n - batch_size, n - timesteps * 2):
+    for i in range(n - batch_size * 2, n - timesteps * 2):
         if (i - train_size) % batch_size == 0:
-            return i
+            val.append(i)
+    return max(val)
 
 
 # print(len(df) * (1 - test_percent))                         # 7890.3
@@ -148,7 +152,7 @@ plt.title('Crude Oil Prices Prediction - MAE')
 plt.xlabel('Time')
 plt.ylabel('Crude Oil Prices')
 plt.legend()
-plt.savefig("data/pred_30_ts.png")
+plt.savefig(f"data/pred_{timesteps}_ts.png")
 plt.show()
 
 test_set = np.reshape(test_set, (test_set.shape[0]))
